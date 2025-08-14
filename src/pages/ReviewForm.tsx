@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Card } from "@/components/ui/card";
@@ -23,9 +24,30 @@ const ReviewForm = () => {
   const categoryTitles = {
     movies: "Movie",
     "tv-series": "TV Series",
-    cricket: "Cricket Match/Player",
+    sports: "Sport/Game",
     "mobile-apps": "Mobile App",
   };
+
+  const sportsOptions = [
+    "Cricket",
+    "Football",
+    "Basketball", 
+    "Tennis",
+    "Badminton",
+    "Hockey",
+    "Baseball",
+    "Rugby",
+    "Golf",
+    "Swimming",
+    "Athletics",
+    "Boxing",
+    "Wrestling",
+    "Volleyball",
+    "Table Tennis",
+    "Chess",
+    "Esports",
+    "Other"
+  ];
 
   const categoryTitle = categoryTitles[category as keyof typeof categoryTitles] || "Item";
 
@@ -101,12 +123,30 @@ const ReviewForm = () => {
               <label className="block text-sm font-medium mb-2">
                 {categoryTitle} Name *
               </label>
-              <Input
-                placeholder={`Enter the ${categoryTitle.toLowerCase()} name`}
-                value={formData.itemName}
-                onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
-                className="glow-border"
-              />
+              {category === 'sports' ? (
+                <Select 
+                  value={formData.itemName} 
+                  onValueChange={(value) => setFormData({ ...formData, itemName: value })}
+                >
+                  <SelectTrigger className="glow-border bg-card/50 backdrop-blur-sm">
+                    <SelectValue placeholder="Select a sport or game" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card/95 backdrop-blur-sm border-primary/20 z-50">
+                    {sportsOptions.map((sport) => (
+                      <SelectItem key={sport} value={sport} className="hover:bg-primary/10">
+                        {sport}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Input
+                  placeholder={`Enter the ${categoryTitle.toLowerCase()} name`}
+                  value={formData.itemName}
+                  onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
+                  className="glow-border"
+                />
+              )}
             </div>
 
             {/* Rating */}
