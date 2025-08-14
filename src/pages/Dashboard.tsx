@@ -45,14 +45,14 @@ const Dashboard = () => {
   const categoryData = [
     { category: 'Movies', count: reviews.filter(r => r.category === 'movies').length },
     { category: 'TV Series', count: reviews.filter(r => r.category === 'tv-series').length },
-    { category: 'Cricket', count: reviews.filter(r => r.category === 'cricket').length },
+    { category: 'Sports', count: reviews.filter(r => r.category === 'sports').length },
     { category: 'Apps', count: reviews.filter(r => r.category === 'mobile-apps').length },
   ];
 
   const categoryLabels = {
     movies: 'Movies',
     'tv-series': 'TV Series',
-    cricket: 'Cricket',
+    sports: 'Sports',
     'mobile-apps': 'Apps',
   };
 
@@ -66,7 +66,7 @@ const Dashboard = () => {
               <Star size={48} className="text-muted-foreground mx-auto mb-4" />
               <h2 className="text-xl font-semibold mb-2">No Reviews Yet</h2>
               <p className="text-muted-foreground mb-6">
-                Start sharing your thoughts on movies, TV shows, cricket, and apps!
+                Start sharing your thoughts on movies, TV shows, sports, and apps!
               </p>
               <Button
                 onClick={() => window.location.href = '/'}

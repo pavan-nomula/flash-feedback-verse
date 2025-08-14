@@ -22,9 +22,9 @@ const HomePage = () => {
       gradient: 'from-blue-500 to-cyan-500',
     },
     {
-      id: 'cricket',
-      title: 'Cricket',
-      description: 'Review matches and performances',
+      id: 'sports',
+      title: 'Sports',
+      description: 'Review games, matches and sports experiences',
       icon: Trophy,
       gradient: 'from-green-500 to-emerald-600',
     },
@@ -84,7 +84,7 @@ const HomePage = () => {
                 ⚡ One Review Per Category Policy
               </p>
               <p className="text-foreground mt-2">
-                Each device/account can submit only <strong>one review per category</strong> (Movies, TV Series, Cricket, Mobile Apps) 
+                Each device/account can submit only <strong>one review per category</strong> (Movies, TV Series, Sports, Mobile Apps) 
                 to ensure authenticity and prevent fake reviews. Choose your favorite item in each category!
               </p>
             </div>

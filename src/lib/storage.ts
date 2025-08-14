@@ -1,6 +1,6 @@
 export interface Review {
   id: string;
-  category: 'movies' | 'tv-series' | 'cricket' | 'mobile-apps';
+  category: 'movies' | 'tv-series' | 'sports' | 'mobile-apps';
   itemName: string;
   rating: number;
   reviewText: string;
@@ -88,7 +88,7 @@ export const reviewStorage = {
     const byCategory = {
       movies: reviews.filter(r => r.category === 'movies'),
       'tv-series': reviews.filter(r => r.category === 'tv-series'),
-      cricket: reviews.filter(r => r.category === 'cricket'),
+      sports: reviews.filter(r => r.category === 'sports'),
       'mobile-apps': reviews.filter(r => r.category === 'mobile-apps'),
     };
 
