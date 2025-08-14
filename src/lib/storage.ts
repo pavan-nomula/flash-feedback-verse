@@ -21,8 +21,22 @@ export const reviewStorage = {
     }
   },
 
+  // Check if review already exists for this item
+  hasExistingReview: (category: Review['category'], itemName: string): boolean => {
+    const reviews = reviewStorage.getReviews();
+    return reviews.some(review => 
+      review.category === category && 
+      review.itemName.toLowerCase().trim() === itemName.toLowerCase().trim()
+    );
+  },
+
   // Add a new review
   addReview: (review: Omit<Review, 'id' | 'submissionDate'>): Review => {
+    // Check for existing review first
+    if (reviewStorage.hasExistingReview(review.category, review.itemName)) {
+      throw new Error('You have already reviewed this item. Only one review per item is allowed to ensure genuine feedback.');
+    }
+
     const newReview: Review = {
       ...review,
       id: crypto.randomUUID(),

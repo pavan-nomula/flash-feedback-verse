@@ -58,11 +58,16 @@ const ReviewForm = () => {
         reviewText: formData.reviewText.trim(),
       });
 
+      toast({
+        title: "Review Submitted!",
+        description: "Thank you for your genuine feedback.",
+      });
+
       navigate("/thank-you");
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to save review. Please try again.",
+        title: "Review Already Exists",
+        description: error instanceof Error ? error.message : "You can only submit one review per item to ensure genuine feedback.",
         variant: "destructive",
       });
     }
