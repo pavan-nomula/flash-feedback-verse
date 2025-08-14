@@ -21,20 +21,17 @@ export const reviewStorage = {
     }
   },
 
-  // Check if review already exists for this item
-  hasExistingReview: (category: Review['category'], itemName: string): boolean => {
+  // Check if review already exists for this category
+  hasExistingReview: (category: Review['category']): boolean => {
     const reviews = reviewStorage.getReviews();
-    return reviews.some(review => 
-      review.category === category && 
-      review.itemName.toLowerCase().trim() === itemName.toLowerCase().trim()
-    );
+    return reviews.some(review => review.category === category);
   },
 
   // Add a new review
   addReview: (review: Omit<Review, 'id' | 'submissionDate'>): Review => {
-    // Check for existing review first
-    if (reviewStorage.hasExistingReview(review.category, review.itemName)) {
-      throw new Error('You have already reviewed this item. Only one review per item is allowed to ensure genuine feedback.');
+    // Check for existing review in this category first
+    if (reviewStorage.hasExistingReview(review.category)) {
+      throw new Error(`You have already submitted a review in the ${review.category} category. Only one review per category is allowed per device to ensure genuine feedback.`);
     }
 
     const newReview: Review = {

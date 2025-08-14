@@ -81,11 +81,11 @@ const HomePage = () => {
             </p>
             <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 max-w-3xl mx-auto">
               <p className="text-primary font-semibold text-lg">
-                ⚡ One Device, One Review Policy
+                ⚡ One Review Per Category Policy
               </p>
               <p className="text-foreground mt-2">
-                Each device can submit only <strong>one review per item</strong> to ensure authenticity and prevent fake reviews. 
-                Your honest opinion matters!
+                Each device/account can submit only <strong>one review per category</strong> (Movies, TV Series, Cricket, Mobile Apps) 
+                to ensure authenticity and prevent fake reviews. Choose your favorite item in each category!
               </p>
             </div>
           </div>
