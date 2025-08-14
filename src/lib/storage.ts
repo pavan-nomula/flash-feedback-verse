@@ -68,7 +68,7 @@ export const reviewStorage = {
     }
   },
 
-  // Get analytics data
+  // Get analytics data with Pareto distribution analysis
   getAnalytics: () => {
     const reviews = reviewStorage.getReviews();
     
@@ -84,12 +84,76 @@ export const reviewStorage = {
       ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
       : 0;
 
-    // Top and lowest rated by category
+    // Reviews by category
     const byCategory = {
       movies: reviews.filter(r => r.category === 'movies'),
       'tv-series': reviews.filter(r => r.category === 'tv-series'),
       sports: reviews.filter(r => r.category === 'sports'),
       'mobile-apps': reviews.filter(r => r.category === 'mobile-apps'),
+    };
+
+    // Pareto Analysis - 80/20 distribution
+    const categoryReviewCounts = Object.entries(byCategory).map(([category, categoryReviews]) => ({
+      category,
+      count: categoryReviews.length,
+      percentage: reviews.length > 0 ? (categoryReviews.length / reviews.length) * 100 : 0
+    })).sort((a, b) => b.count - a.count);
+
+    // Calculate cumulative percentage for Pareto chart
+    let cumulativeCount = 0;
+    const paretoData = categoryReviewCounts.map(item => {
+      cumulativeCount += item.count;
+      return {
+        ...item,
+        cumulativePercentage: reviews.length > 0 ? (cumulativeCount / reviews.length) * 100 : 0
+      };
+    });
+
+    // Rating distribution analysis with Pareto principle
+    const ratingCounts = [1, 2, 3, 4, 5].map(rating => ({
+      rating,
+      count: reviews.filter(r => r.rating === rating).length,
+      percentage: reviews.length > 0 ? (reviews.filter(r => r.rating === rating).length / reviews.length) * 100 : 0
+    })).sort((a, b) => b.count - a.count);
+
+    // Item popularity analysis (Pareto distribution)
+    const itemFrequency = reviews.reduce((acc, review) => {
+      const key = `${review.category}-${review.itemName}`;
+      acc[key] = (acc[key] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const popularItems = Object.entries(itemFrequency)
+      .map(([item, frequency]) => ({
+        item: item.split('-').slice(1).join('-'), // Remove category prefix
+        category: item.split('-')[0],
+        frequency,
+        percentage: reviews.length > 0 ? (frequency / reviews.length) * 100 : 0
+      }))
+      .sort((a, b) => b.frequency - a.frequency)
+      .slice(0, 10); // Top 10 most reviewed items
+
+    // Time-based Pareto analysis
+    const reviewsByMonth = reviews.reduce((acc, review) => {
+      const month = new Date(review.submissionDate).toISOString().slice(0, 7); // YYYY-MM
+      acc[month] = (acc[month] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const monthlyData = Object.entries(reviewsByMonth)
+      .map(([month, count]) => ({
+        month,
+        count,
+        percentage: reviews.length > 0 ? (count / reviews.length) * 100 : 0
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    // Quality distribution (Pareto principle for high-quality reviews)
+    const highQualityReviews = reviews.filter(r => r.reviewText.length > 50 && r.rating >= 4);
+    const qualityDistribution = {
+      highQuality: highQualityReviews.length,
+      standardQuality: reviews.length - highQualityReviews.length,
+      highQualityPercentage: reviews.length > 0 ? (highQualityReviews.length / reviews.length) * 100 : 0
     };
 
     const topRated = Object.entries(byCategory).map(([category, categoryReviews]) => ({
@@ -112,6 +176,12 @@ export const reviewStorage = {
       averageRating,
       topRated,
       lowestRated,
+      // Pareto distribution analytics
+      paretoData,
+      ratingDistribution: ratingCounts,
+      popularItems,
+      monthlyTrends: monthlyData,
+      qualityDistribution
     };
   },
 };

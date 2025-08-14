@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { reviewStorage, Review } from "@/lib/storage";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, ComposedChart } from "recharts";
 import { Trash2, Star, TrendingUp, Award, Target } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -144,8 +144,164 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Charts */}
+        {/* Enhanced Charts with Pareto Analysis */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Pareto Chart - Category Distribution */}
+          <Card className="glass p-6">
+            <h3 className="text-xl font-bold mb-4">Category Distribution (Pareto Analysis)</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <ComposedChart data={analytics.paretoData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis 
+                  dataKey="category" 
+                  stroke="hsl(var(--muted-foreground))"
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis 
+                  yAxisId="left"
+                  stroke="hsl(var(--muted-foreground))"
+                  tick={{ fontSize: 12 }}
+                />
+                <YAxis 
+                  yAxisId="right" 
+                  orientation="right"
+                  stroke="hsl(var(--primary))"
+                  tick={{ fontSize: 12 }}
+                  domain={[0, 100]}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }} 
+                />
+                <Bar 
+                  yAxisId="left"
+                  dataKey="count" 
+                  fill="hsl(var(--primary))" 
+                  radius={4}
+                  name="Review Count"
+                />
+                <Line
+                  yAxisId="right"
+                  type="monotone"
+                  dataKey="cumulativePercentage"
+                  stroke="hsl(var(--destructive))"
+                  strokeWidth={3}
+                  dot={{ fill: 'hsl(var(--destructive))', strokeWidth: 2, r: 4 }}
+                  name="Cumulative %"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+            <p className="text-sm text-muted-foreground mt-2">
+              Shows which categories generate the most reviews (80/20 principle)
+            </p>
+          </Card>
+
+          {/* Rating Distribution */}
+          <Card className="glass p-6">
+            <h3 className="text-xl font-bold mb-4">Rating Distribution Pattern</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analytics.ratingDistribution}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis 
+                  dataKey="rating" 
+                  stroke="hsl(var(--muted-foreground))"
+                  label={{ value: 'Rating', position: 'insideBottom', offset: -5 }}
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))"
+                  label={{ value: 'Count', angle: -90, position: 'insideLeft' }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                  formatter={(value, name) => [`${value} reviews`, 'Count']}
+                />
+                <Bar 
+                  dataKey="count" 
+                  fill="hsl(var(--secondary))" 
+                  radius={4}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+            <p className="text-sm text-muted-foreground mt-2">
+              Distribution of ratings showing user satisfaction patterns
+            </p>
+          </Card>
+        </div>
+
+        {/* Popular Items and Quality Analysis */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Most Popular Items */}
+          <Card className="glass p-6">
+            <h3 className="text-xl font-bold mb-4">Most Popular Items</h3>
+            <div className="space-y-3 max-h-80 overflow-y-auto">
+              {analytics.popularItems.slice(0, 8).map((item, index) => (
+                <div key={`${item.category}-${item.item}`} className="flex items-center justify-between p-3 bg-card/30 rounded-lg">
+                  <div className="flex-1">
+                    <p className="font-medium truncate">{item.item}</p>
+                    <p className="text-sm text-muted-foreground capitalize">{item.category}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-primary">{item.frequency}</p>
+                    <p className="text-xs text-muted-foreground">{item.percentage.toFixed(1)}%</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              Items generating the most review activity (Pareto principle)
+            </p>
+          </Card>
+
+          {/* Quality Distribution */}
+          <Card className="glass p-6">
+            <h3 className="text-xl font-bold mb-4">Review Quality Analysis</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={[
+                    { 
+                      name: 'High Quality', 
+                      value: analytics.qualityDistribution.highQuality, 
+                      color: '#10B981' 
+                    },
+                    { 
+                      name: 'Standard Quality', 
+                      value: analytics.qualityDistribution.standardQuality, 
+                      color: '#F59E0B' 
+                    }
+                  ]}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={80}
+                  dataKey="value"
+                  label={({ name, value }) => `${name}: ${value}`}
+                >
+                  <Cell fill="#10B981" />
+                  <Cell fill="#F59E0B" />
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="mt-4 text-center">
+              <p className="text-lg font-bold text-primary">
+                {analytics.qualityDistribution.highQualityPercentage.toFixed(1)}%
+              </p>
+              <p className="text-sm text-muted-foreground">
+                High-quality detailed reviews (4+ stars, 50+ characters)
+              </p>
+            </div>
+          </Card>
+        </div>
+
+        {/* Sentiment Analysis */}
+        <div className="mb-8">
           <Card className="glass p-6">
             <h3 className="text-xl font-bold mb-4">Sentiment Distribution</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -164,25 +320,6 @@ const Dashboard = () => {
                 </Pie>
                 <Tooltip />
               </PieChart>
-            </ResponsiveContainer>
-          </Card>
-
-          <Card className="glass p-6">
-            <h3 className="text-xl font-bold mb-4">Reviews by Category</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={categoryData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="category" stroke="hsl(var(--muted-foreground))" />
-                <YAxis stroke="hsl(var(--muted-foreground))" />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }} 
-                />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={4} />
-              </BarChart>
             </ResponsiveContainer>
           </Card>
         </div>
