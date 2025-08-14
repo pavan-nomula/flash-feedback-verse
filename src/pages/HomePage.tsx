@@ -68,7 +68,28 @@ const HomePage = () => {
             </Button>
           </div>
         </div>
-
+        
+        {/* Genuine Review Policy Section */}
+        <div className="glass rounded-3xl p-6 md:p-8 mb-16 animate-slide-up border border-primary/20">
+          <div className="text-center">
+            <h2 className="text-2xl md:text-3xl font-bold gradient-text mb-4">
+              🛡️ Genuine Reviews Only
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground mb-4 max-w-4xl mx-auto">
+              This website is dedicated to providing and showcasing <span className="text-primary font-semibold">100% genuine reviews</span>. 
+              We believe in authentic feedback from real users.
+            </p>
+            <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 max-w-3xl mx-auto">
+              <p className="text-primary font-semibold text-lg">
+                ⚡ One Device, One Review Policy
+              </p>
+              <p className="text-foreground mt-2">
+                Each device can submit only <strong>one review per item</strong> to ensure authenticity and prevent fake reviews. 
+                Your honest opinion matters!
+              </p>
+            </div>
+          </div>
+        </div>
         {/* Categories Section */}
         <div id="categories" className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
