@@ -11,155 +11,60 @@ interface MovieSuggestionsProps {
   className?: string;
 }
 
-// Popular movie suggestions for better UX
-const MOVIE_SUGGESTIONS = [
-  "The Shawshank Redemption",
-  "The Godfather",
-  "The Dark Knight",
-  "Pulp Fiction",
-  "Forrest Gump",
-  "Inception",
-  "The Matrix",
-  "Goodfellas",
-  "The Lord of the Rings",
-  "Star Wars",
-  "Avatar",
-  "Titanic",
-  "Avengers",
-  "Spider-Man",
-  "Batman",
-  "Iron Man",
-  "Jurassic Park",
-  "The Lion King",
-  "Frozen",
-  "Toy Story",
-  "Finding Nemo",
-  "The Incredibles",
-  "Shrek",
-  "Moana",
-  "Encanto",
-  "Black Panther",
-  "Wonder Woman",
-  "Guardians of the Galaxy",
-  "Deadpool",
-  "John Wick",
-  "Mission Impossible",
-  "Fast and Furious",
-  "Transformers",
-  "Pirates of the Caribbean",
-  "Harry Potter",
-  "The Hobbit",
-  "Mad Max",
-  "Blade Runner",
-  "Alien",
-  "Terminator",
-  "Back to the Future",
-  "Ghostbusters",
-  "Indiana Jones",
-  "Rocky",
-  "Top Gun",
-  "Interstellar",
-  "Gravity",
-  "La La Land",
-  "Joker",
-  "Parasite",
-  "Nomadland",
-  "Dune",
-  "Spider-Man: No Way Home",
-  "Doctor Strange",
-  "Thor",
-  "Captain America",
-  "Ant-Man",
-  "Captain Marvel",
-  "The Eternals",
-  "Shang-Chi",
-  "Black Widow",
-  "Loki",
-  "WandaVision",
-  "The Falcon and the Winter Soldier",
-  "Squid Game",
-  "Stranger Things",
-  "The Crown",
-  "Bridgerton",
-  "Money Heist",
-  "Breaking Bad",
-  "Game of Thrones",
-  "Friends",
-  "The Office",
-  "Brooklyn Nine-Nine",
-  "How I Met Your Mother",
-  "The Big Bang Theory",
-  "Sherlock",
-  "Peaky Blinders",
-  "Vikings",
-  "The Witcher",
-  "House of Cards",
-  "Narcos",
-  "Orange Is the New Black",
-  "Ozark",
-  "Better Call Saul",
-  "The Walking Dead",
-  "Lost",
-  "Prison Break",
-  "24",
-  "Homeland",
-  "Suits",
-  "Mad Men",
-  "Westworld",
-  "True Detective",
-  "Fargo",
-  "The Mandalorian",
-  "House of the Dragon",
-  "The Boys",
-  "Euphoria",
-  "Wednesday",
-  "The Bear",
-  "Ted Lasso",
-  "Succession",
-  "The White Lotus",
-  "Mare of Easttown",
-  "Queen's Gambit",
-  "Bridgerton",
-  "Emily in Paris",
-  "Ginny & Georgia",
-  "13 Reasons Why",
-  "Riverdale",
-  "Elite",
-  "Sex Education",
-  "Never Have I Ever",
-  "To All the Boys",
-  "The Kissing Booth",
-  "After",
-  "The Fault in Our Stars",
-  "Me Before You",
-  "A Star is Born",
-  "Bohemian Rhapsody",
-  "Rocketman",
-  "Greatest Showman",
-  "Mamma Mia",
-  "High School Musical",
-  "Grease",
-  "Chicago",
-  "Moulin Rouge",
-  "Les Misérables"
-];
-
 export const MovieSuggestions = ({ value, onChange, placeholder, className }: MovieSuggestionsProps) => {
   const [open, setOpen] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (value.length > 0) {
-      const filtered = MOVIE_SUGGESTIONS.filter(movie =>
-        movie.toLowerCase().includes(value.toLowerCase())
-      ).slice(0, 10); // Limit to 10 suggestions for better UX
-      setFilteredSuggestions(filtered);
-      setOpen(filtered.length > 0 && value.length > 1);
-    } else {
+  const searchMovies = async (query: string) => {
+    if (query.length < 2) {
       setFilteredSuggestions([]);
-      setOpen(false);
+      return;
     }
+
+    setLoading(true);
+    console.log('Searching for movies:', query);
+
+    try {
+      const response = await fetch('/functions/v1/search-movies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
+
+      console.log('Response status:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('API response:', data);
+
+      if (data.movies && Array.isArray(data.movies)) {
+        setFilteredSuggestions(data.movies);
+        setOpen(data.movies.length > 0);
+      } else {
+        console.error('Invalid response format:', data);
+        setFilteredSuggestions([]);
+      }
+    } catch (error) {
+      console.error('Error searching movies:', error);
+      setFilteredSuggestions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      searchMovies(value);
+    }, 300); // Debounce API calls
+
+    return () => clearTimeout(timeoutId);
   }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,7 +111,11 @@ export const MovieSuggestions = ({ value, onChange, placeholder, className }: Mo
       >
         <Command>
           <CommandList>
-            {filteredSuggestions.length === 0 ? (
+            {loading ? (
+              <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
+                Searching for movies...
+              </CommandEmpty>
+            ) : filteredSuggestions.length === 0 ? (
               <CommandEmpty className="py-6 text-center text-sm text-muted-foreground">
                 No movies found. Keep typing to add your own.
               </CommandEmpty>
