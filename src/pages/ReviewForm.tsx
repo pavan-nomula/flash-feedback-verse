@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Star } from "lucide-react";
 import { reviewStorage } from "@/lib/storage";
 import { useToast } from "@/hooks/use-toast";
+import { MovieSuggestions } from "@/components/MovieSuggestions";
 
 const ReviewForm = () => {
   const { category } = useParams<{ category: string }>();
@@ -139,6 +140,12 @@ const ReviewForm = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              ) : category === 'movies' ? (
+                <MovieSuggestions
+                  value={formData.itemName}
+                  onChange={(value) => setFormData({ ...formData, itemName: value })}
+                  placeholder="Start typing a movie name..."
+                />
               ) : (
                 <Input
                   placeholder={`Enter the ${categoryTitle.toLowerCase()} name`}
