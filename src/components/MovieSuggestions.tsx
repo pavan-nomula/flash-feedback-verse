@@ -17,6 +17,13 @@ export const MovieSuggestions = ({ value, onChange, placeholder, className }: Mo
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Fallback movie suggestions while API key is not configured
+  const fallbackMovies = [
+    "The Shawshank Redemption", "The Godfather", "The Dark Knight", "Pulp Fiction",
+    "Forrest Gump", "Inception", "The Matrix", "Goodfellas", "Star Wars", "Avatar",
+    "Titanic", "Avengers", "Spider-Man", "Batman", "Iron Man", "Jurassic Park"
+  ];
+
   const searchMovies = async (query: string) => {
     if (query.length < 2) {
       setFilteredSuggestions([]);
@@ -38,7 +45,14 @@ export const MovieSuggestions = ({ value, onChange, placeholder, className }: Mo
       console.log('Response status:', response.status);
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        console.log('API not available, using fallback suggestions');
+        // Fallback to local filtering
+        const filtered = fallbackMovies.filter(movie =>
+          movie.toLowerCase().includes(query.toLowerCase())
+        ).slice(0, 10);
+        setFilteredSuggestions(filtered);
+        setOpen(filtered.length > 0);
+        return;
       }
 
       const data = await response.json();
@@ -48,12 +62,21 @@ export const MovieSuggestions = ({ value, onChange, placeholder, className }: Mo
         setFilteredSuggestions(data.movies);
         setOpen(data.movies.length > 0);
       } else {
-        console.error('Invalid response format:', data);
-        setFilteredSuggestions([]);
+        console.log('Invalid response, using fallback');
+        const filtered = fallbackMovies.filter(movie =>
+          movie.toLowerCase().includes(query.toLowerCase())
+        ).slice(0, 10);
+        setFilteredSuggestions(filtered);
+        setOpen(filtered.length > 0);
       }
     } catch (error) {
-      console.error('Error searching movies:', error);
-      setFilteredSuggestions([]);
+      console.log('API error, using fallback suggestions:', error);
+      // Fallback to local filtering
+      const filtered = fallbackMovies.filter(movie =>
+        movie.toLowerCase().includes(query.toLowerCase())
+      ).slice(0, 10);
+      setFilteredSuggestions(filtered);
+      setOpen(filtered.length > 0);
     } finally {
       setLoading(false);
     }
