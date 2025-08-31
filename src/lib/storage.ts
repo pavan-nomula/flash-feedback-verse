@@ -1,10 +1,18 @@
 export interface Review {
   id: string;
   category: 'movies' | 'tv-series' | 'sports' | 'mobile-apps';
+  subcategory?: string; // For sports: cricket, football, etc. For cricket: match, player, etc.
   itemName: string;
   rating: number;
   reviewText: string;
   submissionDate: string;
+  // Additional fields for specific review types
+  playerPosition?: string; // For player reviews
+  battingStyle?: string; // For cricket player reviews
+  bowlingStyle?: string; // For cricket player reviews
+  matchDate?: string; // For match reviews
+  teamA?: string; // For match reviews
+  teamB?: string; // For match reviews
 }
 
 const STORAGE_KEY = 'flash_feedback_reviews';
@@ -21,17 +29,21 @@ export const reviewStorage = {
     }
   },
 
-  // Check if review already exists for this category
-  hasExistingReview: (category: Review['category']): boolean => {
+  // Check if review already exists for this specific item
+  hasExistingReview: (category: Review['category'], itemName: string, subcategory?: string): boolean => {
     const reviews = reviewStorage.getReviews();
-    return reviews.some(review => review.category === category);
+    return reviews.some(review => 
+      review.category === category && 
+      review.itemName.toLowerCase() === itemName.toLowerCase() &&
+      review.subcategory === subcategory
+    );
   },
 
   // Add a new review
   addReview: (review: Omit<Review, 'id' | 'submissionDate'>): Review => {
-    // Check for existing review in this category first
-    if (reviewStorage.hasExistingReview(review.category)) {
-      throw new Error(`You have already submitted a review in the ${review.category} category. Only one review per category is allowed per device to ensure genuine feedback.`);
+    // Check for existing review of this specific item
+    if (reviewStorage.hasExistingReview(review.category, review.itemName, review.subcategory)) {
+      throw new Error(`You have already reviewed "${review.itemName}". Please review a different item or edit your existing review.`);
     }
 
     const newReview: Review = {
