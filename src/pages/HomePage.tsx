@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { Film, Tv, Trophy, Smartphone } from "lucide-react";
 import CategoryCard from "@/components/CategoryCard";
 import { Button } from "@/components/ui/button";
+import TrendingContent from "@/components/TrendingContent";
+
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -111,6 +113,19 @@ const HomePage = () => {
                 />
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Trending Section */}
+        <div className="mb-16">
+          <div className="glass rounded-3xl p-8 md:p-12 animate-slide-up">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold gradient-text mb-2">Trending Now</h2>
+              <p className="text-muted-foreground text-lg">
+                Jump into what's popular and add your review in seconds.
+              </p>
+            </div>
+            <TrendingContent />
           </div>
         </div>
 

@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
@@ -15,10 +16,13 @@ import { ReviewField } from "@/data/sportsCategories";
 const ReviewForm = () => {
   const { category } = useParams<{ category: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
+
+  const prefilledItemName = new URLSearchParams(location.search).get("item") ?? "";
   
   const [formData, setFormData] = useState({
-    itemName: "",
+    itemName: prefilledItemName,
     rating: [3],
     reviewText: "",
     subcategory: "",

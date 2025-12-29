@@ -1,8 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Command, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Search } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface MovieSuggestionsProps {
   value: string;
@@ -11,70 +18,74 @@ interface MovieSuggestionsProps {
   className?: string;
 }
 
-export const MovieSuggestions = ({ value, onChange, placeholder, className }: MovieSuggestionsProps) => {
+export const MovieSuggestions = ({
+  value,
+  onChange,
+  placeholder,
+  className,
+}: MovieSuggestionsProps) => {
   const [open, setOpen] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Fallback movie suggestions while API key is not configured
   const fallbackMovies = [
-    "The Shawshank Redemption", "The Godfather", "The Dark Knight", "Pulp Fiction",
-    "Forrest Gump", "Inception", "The Matrix", "Goodfellas", "Star Wars", "Avatar",
-    "Titanic", "Avengers", "Spider-Man", "Batman", "Iron Man", "Jurassic Park"
+    "The Shawshank Redemption",
+    "The Godfather",
+    "The Dark Knight",
+    "Pulp Fiction",
+    "Forrest Gump",
+    "Inception",
+    "The Matrix",
+    "Goodfellas",
+    "Star Wars",
+    "Avatar",
+    "Titanic",
+    "Avengers",
+    "Spider-Man",
+    "Batman",
+    "Iron Man",
+    "Jurassic Park",
   ];
+
+  const localFilter = (query: string) =>
+    fallbackMovies
+      .filter((movie) => movie.toLowerCase().includes(query.toLowerCase()))
+      .slice(0, 10);
 
   const searchMovies = async (query: string) => {
     if (query.length < 2) {
       setFilteredSuggestions([]);
+      setOpen(false);
       return;
     }
 
     setLoading(true);
-    console.log('Searching for movies:', query);
 
     try {
-      const response = await fetch('/functions/v1/search-movies', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query }),
+      const { data, error } = await supabase.functions.invoke("search-movies", {
+        body: { query },
       });
 
-      console.log('Response status:', response.status);
-      
-      if (!response.ok) {
-        console.log('API not available, using fallback suggestions');
-        // Fallback to local filtering
-        const filtered = fallbackMovies.filter(movie =>
-          movie.toLowerCase().includes(query.toLowerCase())
-        ).slice(0, 10);
+      if (error) {
+        const filtered = localFilter(query);
         setFilteredSuggestions(filtered);
         setOpen(filtered.length > 0);
         return;
       }
 
-      const data = await response.json();
-      console.log('API response:', data);
-
-      if (data.movies && Array.isArray(data.movies)) {
-        setFilteredSuggestions(data.movies);
-        setOpen(data.movies.length > 0);
-      } else {
-        console.log('Invalid response, using fallback');
-        const filtered = fallbackMovies.filter(movie =>
-          movie.toLowerCase().includes(query.toLowerCase())
-        ).slice(0, 10);
-        setFilteredSuggestions(filtered);
-        setOpen(filtered.length > 0);
+      const movies = Array.isArray((data as any)?.movies) ? ((data as any).movies as string[]) : [];
+      if (movies.length > 0) {
+        setFilteredSuggestions(movies);
+        setOpen(true);
+        return;
       }
-    } catch (error) {
-      console.log('API error, using fallback suggestions:', error);
-      // Fallback to local filtering
-      const filtered = fallbackMovies.filter(movie =>
-        movie.toLowerCase().includes(query.toLowerCase())
-      ).slice(0, 10);
+
+      const filtered = localFilter(query);
+      setFilteredSuggestions(filtered);
+      setOpen(filtered.length > 0);
+    } catch {
+      const filtered = localFilter(query);
       setFilteredSuggestions(filtered);
       setOpen(filtered.length > 0);
     } finally {
@@ -83,16 +94,16 @@ export const MovieSuggestions = ({ value, onChange, placeholder, className }: Mo
   };
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      searchMovies(value);
-    }, 300); // Debounce API calls
+    const timeoutId = window.setTimeout(() => {
+      void searchMovies(value);
+    }, 300);
 
-    return () => clearTimeout(timeoutId);
+    return () => window.clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    onChange(newValue);
+    onChange(e.target.value);
   };
 
   const handleSuggestionSelect = (suggestion: string) => {
@@ -102,9 +113,7 @@ export const MovieSuggestions = ({ value, onChange, placeholder, className }: Mo
   };
 
   const handleInputKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setOpen(false);
-    }
+    if (e.key === "Escape") setOpen(false);
   };
 
   return (
@@ -117,18 +126,17 @@ export const MovieSuggestions = ({ value, onChange, placeholder, className }: Mo
             value={value}
             onChange={handleInputChange}
             onKeyDown={handleInputKeyDown}
-            className={`glow-border pr-10 ${className}`}
+            className={`glow-border pr-10 ${className ?? ""}`}
             onFocus={() => {
-              if (value.length > 1 && filteredSuggestions.length > 0) {
-                setOpen(true);
-              }
+              if (value.length > 1 && filteredSuggestions.length > 0) setOpen(true);
             }}
           />
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         </div>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-[var(--radix-popover-trigger-width)] p-0 bg-card/95 backdrop-blur-sm border-primary/20" 
+
+      <PopoverContent
+        className="w-[var(--radix-popover-trigger-width)] p-0 bg-card/95 backdrop-blur-sm border-primary/20"
         align="start"
         sideOffset={4}
       >
