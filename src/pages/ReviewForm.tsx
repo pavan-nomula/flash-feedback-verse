@@ -81,10 +81,28 @@ const ReviewForm = () => {
 
       toast({
         title: "Review Submitted!",
-        description: "Thank you for your genuine feedback.",
+        description: category === 'movies' 
+          ? "Thank you! Want to review another movie?" 
+          : "Thank you for your genuine feedback.",
       });
 
-      navigate("/thank-you");
+      if (category === 'movies') {
+        // Reset form for another movie review
+        setFormData({
+          itemName: "",
+          rating: [3],
+          reviewText: "",
+          subcategory: "",
+          reviewType: "",
+          additionalFields: {}
+        });
+        toast({
+          title: "Add Another Review?",
+          description: "Feel free to review more movies!",
+        });
+      } else {
+        navigate("/thank-you");
+      }
     } catch (error) {
       toast({
         title: "Review Already Exists",
@@ -181,6 +199,14 @@ const ReviewForm = () => {
           <p className="text-muted-foreground">
             Share your thoughts and help others discover great content
           </p>
+          {category === 'movies' && (
+            <div className="mt-4 p-4 bg-primary/10 border border-primary/30 rounded-xl">
+              <p className="text-sm text-foreground">
+                🎬 <strong>Love movies?</strong> You can review as many different movies as you like! 
+                Each movie can only be reviewed once per device to ensure authentic feedback.
+              </p>
+            </div>
+          )}
         </div>
 
         <Card className="glass p-8 animate-slide-up">
