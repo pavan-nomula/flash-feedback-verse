@@ -50,11 +50,11 @@ serve(async (req) => {
     const searchData = await searchResponse.json()
     console.log(`Found ${searchData.results?.length || 0} movies`)
 
-    // Extract movie titles with year for better identification
-    const movies = (searchData.results || []).slice(0, 10).map((movie: any) => {
-      const year = movie.release_date ? ` (${movie.release_date.substring(0, 4)})` : ''
-      return `${movie.title}${year}`
-    })
+    // Extract movie titles with year and poster for better identification
+    const movies = (searchData.results || []).slice(0, 10).map((movie: any) => ({
+      title: movie.title + (movie.release_date ? ` (${movie.release_date.substring(0, 4)})` : ''),
+      poster: movie.poster_path ? `https://image.tmdb.org/t/p/w92${movie.poster_path}` : null,
+    }))
 
     // Also fetch trending/recent movies if query matches common terms
     let recentMovies: string[] = []
@@ -77,10 +77,10 @@ serve(async (req) => {
               movie.title.toLowerCase().includes(query.toLowerCase())
             )
             .slice(0, 5)
-            .map((movie: any) => {
-              const year = movie.release_date ? ` (${movie.release_date.substring(0, 4)})` : ''
-              return `${movie.title}${year}`
-            })
+            .map((movie: any) => ({
+              title: movie.title + (movie.release_date ? ` (${movie.release_date.substring(0, 4)})` : ''),
+              poster: movie.poster_path ? `https://image.tmdb.org/t/p/w92${movie.poster_path}` : null,
+            }))
         }
       } catch (error) {
         console.log('Could not fetch trending movies:', error)
@@ -88,7 +88,12 @@ serve(async (req) => {
     }
 
     // Combine and deduplicate results, prioritizing trending
-    const allMovies = [...new Set([...recentMovies, ...movies])].slice(0, 10)
+    const seen = new Set<string>()
+    const allMovies = [...recentMovies, ...movies].filter((m) => {
+      if (seen.has(m.title)) return false
+      seen.add(m.title)
+      return true
+    }).slice(0, 10)
 
     return new Response(
       JSON.stringify({ movies: allMovies }),

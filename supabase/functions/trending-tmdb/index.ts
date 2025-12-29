@@ -47,14 +47,16 @@ serve(async (req) => {
     const moviesJson = await moviesRes.json();
     const tvJson = await tvRes.json();
 
-    const movies = (moviesJson?.results ?? []).slice(0, maxItems).map((m: TmdbItem) => ({
+    const movies = (moviesJson?.results ?? []).slice(0, maxItems).map((m: any) => ({
       title: m.title ?? "",
       year: m.release_date ? String(m.release_date).slice(0, 4) : undefined,
+      poster: m.poster_path ? `https://image.tmdb.org/t/p/w185${m.poster_path}` : null,
     })).filter((m: any) => m.title);
 
-    const tv = (tvJson?.results ?? []).slice(0, maxItems).map((s: TmdbItem) => ({
+    const tv = (tvJson?.results ?? []).slice(0, maxItems).map((s: any) => ({
       title: s.name ?? "",
       year: s.first_air_date ? String(s.first_air_date).slice(0, 4) : undefined,
+      poster: s.poster_path ? `https://image.tmdb.org/t/p/w185${s.poster_path}` : null,
     })).filter((s: any) => s.title);
 
     return new Response(JSON.stringify({ movies, tv }), {

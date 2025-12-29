@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import TrendingSection, { TrendingItem } from "@/components/TrendingSection";
 
 type TmdbTrendingResponse = {
-  movies: { title: string; year?: string }[];
-  tv: { title: string; year?: string }[];
+  movies: { title: string; year?: string; poster?: string | null }[];
+  tv: { title: string; year?: string; poster?: string | null }[];
 };
 
 const TrendingContent = () => {
@@ -29,6 +29,7 @@ const TrendingContent = () => {
     return data.movies.map((m) => ({
       title: m.year ? `${m.title} (${m.year})` : m.title,
       subtitle: "Popular this week",
+      poster: m.poster,
     }));
   }, [data?.movies]);
 
@@ -37,6 +38,7 @@ const TrendingContent = () => {
     return data.tv.map((s) => ({
       title: s.year ? `${s.title} (${s.year})` : s.title,
       subtitle: "Popular this week",
+      poster: s.poster,
     }));
   }, [data?.tv]);
 
@@ -70,6 +72,7 @@ const TrendingContent = () => {
         items={isLoading ? [] : trendingMovies}
         emptyText={isLoading ? "Loading…" : "No trending movies found."}
         onReview={(title) => goReview("movies", title)}
+        type="movie"
       />
 
       <TrendingSection
@@ -78,6 +81,7 @@ const TrendingContent = () => {
         items={isLoading ? [] : trendingTv}
         emptyText={isLoading ? "Loading…" : "No trending TV series found."}
         onReview={(title) => goReview("tv-series", title)}
+        type="tv"
       />
 
       <TrendingSection
@@ -85,6 +89,7 @@ const TrendingContent = () => {
         description="Quick picks to review today (we can connect a live sports data source next)."
         items={trendingSports}
         onReview={(title) => goReview("sports", title)}
+        type="sport"
       />
 
       <TrendingSection
@@ -92,6 +97,7 @@ const TrendingContent = () => {
         description="Popular apps to review (we can connect Play Store/App Store data next)."
         items={trendingApps}
         onReview={(title) => goReview("mobile-apps", title)}
+        type="app"
       />
     </section>
   );
