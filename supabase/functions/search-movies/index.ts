@@ -23,42 +23,75 @@ serve(async (req) => {
       )
     }
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY')
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY not found')
+    const tmdbApiKey = Deno.env.get('TMDB_API_KEY')
+    if (!tmdbApiKey) {
+      console.error('TMDB_API_KEY not found')
+      throw new Error('TMDB_API_KEY not configured')
     }
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${geminiApiKey}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `Find movies that match the search query: "${query}". Include movies from all languages and countries worldwide (Hollywood, Bollywood, European, Asian, etc.). Return exactly 10 movie suggestions as a JSON array of strings. Format: ["Movie Title 1", "Movie Title 2", ...]. Only return the JSON array, nothing else.`
-          }]
-        }],
-        generationConfig: {
-          temperature: 0.1,
-          maxOutputTokens: 500
+    console.log(`Searching TMDB for: ${query}`)
+
+    // Search for movies using TMDB API
+    const searchResponse = await fetch(
+      `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodeURIComponent(query)}&include_adult=false&language=en-US&page=1`,
+      {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
         }
-      })
+      }
+    )
+
+    if (!searchResponse.ok) {
+      console.error(`TMDB API error: ${searchResponse.status} ${searchResponse.statusText}`)
+      throw new Error(`TMDB API error: ${searchResponse.statusText}`)
+    }
+
+    const searchData = await searchResponse.json()
+    console.log(`Found ${searchData.results?.length || 0} movies`)
+
+    // Extract movie titles with year for better identification
+    const movies = (searchData.results || []).slice(0, 10).map((movie: any) => {
+      const year = movie.release_date ? ` (${movie.release_date.substring(0, 4)})` : ''
+      return `${movie.title}${year}`
     })
 
-    if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.statusText}`)
+    // Also fetch trending/recent movies if query matches common terms
+    let recentMovies: string[] = []
+    if (query.length >= 2) {
+      try {
+        const trendingResponse = await fetch(
+          `https://api.themoviedb.org/3/trending/movie/week?api_key=${tmdbApiKey}&language=en-US`,
+          {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+            }
+          }
+        )
+
+        if (trendingResponse.ok) {
+          const trendingData = await trendingResponse.json()
+          recentMovies = (trendingData.results || [])
+            .filter((movie: any) => 
+              movie.title.toLowerCase().includes(query.toLowerCase())
+            )
+            .slice(0, 5)
+            .map((movie: any) => {
+              const year = movie.release_date ? ` (${movie.release_date.substring(0, 4)})` : ''
+              return `${movie.title}${year}`
+            })
+        }
+      } catch (error) {
+        console.log('Could not fetch trending movies:', error)
+      }
     }
 
-    const data = await response.json()
-    const content = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]'
-    
-    // Extract JSON array from the response
-    const jsonMatch = content.match(/\[.*\]/s)
-    const movies = jsonMatch ? JSON.parse(jsonMatch[0]) : []
+    // Combine and deduplicate results, prioritizing trending
+    const allMovies = [...new Set([...recentMovies, ...movies])].slice(0, 10)
 
     return new Response(
-      JSON.stringify({ movies: movies.slice(0, 10) }),
+      JSON.stringify({ movies: allMovies }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 
