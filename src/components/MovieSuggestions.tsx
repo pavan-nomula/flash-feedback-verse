@@ -8,8 +8,13 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Search } from "lucide-react";
+import { Search, Film } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+
+interface MovieResult {
+  title: string;
+  poster: string | null;
+}
 
 interface MovieSuggestionsProps {
   value: string;
@@ -25,11 +30,11 @@ export const MovieSuggestions = ({
   className,
 }: MovieSuggestionsProps) => {
   const [open, setOpen] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<MovieResult[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const fallbackMovies = [
+  const fallbackMovies: MovieResult[] = [
     "The Shawshank Redemption",
     "The Godfather",
     "The Dark Knight",
@@ -38,19 +43,11 @@ export const MovieSuggestions = ({
     "Inception",
     "The Matrix",
     "Goodfellas",
-    "Star Wars",
-    "Avatar",
-    "Titanic",
-    "Avengers",
-    "Spider-Man",
-    "Batman",
-    "Iron Man",
-    "Jurassic Park",
-  ];
+  ].map((title) => ({ title, poster: null }));
 
-  const localFilter = (query: string) =>
+  const localFilter = (query: string): MovieResult[] =>
     fallbackMovies
-      .filter((movie) => movie.toLowerCase().includes(query.toLowerCase()))
+      .filter((movie) => movie.title.toLowerCase().includes(query.toLowerCase()))
       .slice(0, 10);
 
   const searchMovies = async (query: string) => {
@@ -74,7 +71,7 @@ export const MovieSuggestions = ({
         return;
       }
 
-      const movies = Array.isArray((data as any)?.movies) ? ((data as any).movies as string[]) : [];
+      const movies = Array.isArray((data as any)?.movies) ? (data as any).movies : [];
       if (movies.length > 0) {
         setFilteredSuggestions(movies);
         setOpen(true);
@@ -106,8 +103,8 @@ export const MovieSuggestions = ({
     onChange(e.target.value);
   };
 
-  const handleSuggestionSelect = (suggestion: string) => {
-    onChange(suggestion);
+  const handleSuggestionSelect = (suggestion: MovieResult) => {
+    onChange(suggestion.title);
     setOpen(false);
     inputRef.current?.blur();
   };
@@ -154,12 +151,24 @@ export const MovieSuggestions = ({
               <CommandGroup>
                 {filteredSuggestions.map((suggestion) => (
                   <CommandItem
-                    key={suggestion}
-                    value={suggestion}
+                    key={suggestion.title}
+                    value={suggestion.title}
                     onSelect={() => handleSuggestionSelect(suggestion)}
-                    className="cursor-pointer hover:bg-primary/10 transition-colors"
+                    className="cursor-pointer hover:bg-primary/10 transition-colors flex items-center gap-3 py-2"
                   >
-                    {suggestion}
+                    {suggestion.poster ? (
+                      <img
+                        src={suggestion.poster}
+                        alt={`${suggestion.title} poster`}
+                        loading="lazy"
+                        className="w-8 h-12 object-cover rounded-sm flex-shrink-0"
+                      />
+                    ) : (
+                      <div className="w-8 h-12 bg-muted rounded-sm flex items-center justify-center flex-shrink-0">
+                        <Film className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    <span className="truncate">{suggestion.title}</span>
                   </CommandItem>
                 ))}
               </CommandGroup>
