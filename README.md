@@ -1,73 +1,142 @@
-# Welcome to your Lovable project
+⭐ Flash Feedback Verse
 
-## Project info
+A Multi-Sector Smart Review & Insights Platform
 
-**URL**: https://lovable.dev/projects/3996a7d8-e798-4f81-94dd-d220f98fa52d
+Flash Feedback Verse allows users to submit structured feedback on Movies, Series, Sports, Apps, and more — converting crowd reviews into meaningful insights.
 
-## How can I edit this code?
+🚀 Features
 
-There are several ways of editing your application.
+🎬 Review Multiple Content Types
 
-**Use Lovable**
+⭐ Aspect-Based Rating Sliders
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/3996a7d8-e798-4f81-94dd-d220f98fa52d) and start prompting.
+📊 Visual Summary & Analytics (upcoming)
 
-Changes made via Lovable will be committed automatically to this repo.
+🔐 Supabase Integration for Auth (optional)
 
-**Use your preferred IDE**
+⚡ Fast with Vite + TypeScript + React
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+🎨 Modern UI using Tailwind CSS + shadcn-ui Components
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+🏗️ Tech Stack
+Layer	Technology
+Frontend	React (TypeScript)
+Styling	Tailwind CSS + shadcn-ui
+State Mgmt	Custom hooks + React state
+Backend (Optional)	Supabase
+Build tool	Vite
+📂 Project Folder Structure
 
-Follow these steps:
+(From your screenshot)
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+flash-feedback-verse/
+│
+├── public/
+│   ├── favicon.ico
+│   ├── placeholder.svg
+│   └── robots.txt
+│
+├── src/
+│   ├── components/
+│   │   ├── ui/
+│   │   ├── CategoryCard.tsx
+│   │   ├── LoginDialog.tsx
+│   │   ├── MovieSuggestions.tsx
+│   │   ├── Navigation.tsx
+│   │   ├── SportsSelector.tsx
+│   │   ├── TrendingContents.tsx
+│   │   └── TrendingSection.tsx
+│   │
+│   ├── data/
+│   │   └── sportsCategories.ts
+│   │
+│   ├── hooks/
+│   │   ├── use-mobile.tsx
+│   │   └── use-toast.ts
+│   │
+│   ├── integrations/
+│   │   └── supabase/
+│   │       └── clients.ts
+│   │
+│   ├── lib/
+│   │   ├── storage.ts
+│   │   └── utils.ts
+│   │
+│   ├── pages/
+│   │   ├── App.tsx
+│   │   └── index.css
+│   │
+│   ├── main.tsx
+│   └── vite-env.d.ts
+│
+├── .env (create manually)
+├── package.json
+├── tailwind.config.js
+├── tsconfig.json
+└── vite.config.ts
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+🔧 Installation & Running Locally
+📌 Prerequisites
 
-# Step 3: Install the necessary dependencies.
-npm i
+Make sure you have installed:
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+Node.js (version 18+ recommended)
+
+npm / bun / pnpm (any one package manager)
+
+▶️ Steps to Run
+# Clone the repository
+git clone https://github.com/pavan-nomula/flash-feedback-verse.git
+
+# Go inside project
+cd flash-feedback-verse
+
+# Install dependencies
+npm install    # or bun install
+
+# Start development server
 npm run dev
-```
 
-**Edit a file directly in GitHub**
+# Now open the local URL shown in terminal
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+🔑 Environment Variables
 
-**Use GitHub Codespaces**
+Create .env in project root (if Supabase is used):
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+VITE_SUPABASE_PROJECT_ID=""
+VITE_SUPABASE_PUBLISHABLE_KEY=""
+VITE_SUPABASE_URL=""
 
-## What technologies are used for this project?
 
-This project is built with:
+If Supabase is not configured yet, you can comment/remove related calls temporarily.
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+📦 Production Build
+npm run build
 
-## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/3996a7d8-e798-4f81-94dd-d220f98fa52d) and click on Share -> Publish.
+To preview:
 
-## Can I connect a custom domain to my Lovable project?
+npm run preview
 
-Yes, you can!
+🔮 Future Enhancements
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+✔ Full CRUD for content items
+✔ Leaderboards + Trending Analytics
+✔ AI-generated summary reviews
+✔ Social & sharing features
+✔ Push to cloud database with moderation
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+🤝 Contributing
+
+Pull requests are welcome!
+Fork → Commit → PR 🚀
+
+🧑‍💻 Author
+
+Nomula Pavan Durga Sai Charan
+Full-Stack Engineer & UI Enthusiast
+
+⭐ Support
+
+If you liked this project, please ⭐ the repo here:
+👉 https://github.com/pavan-nomula/flash-feedback-verse
