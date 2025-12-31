@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.trending-tmdb]
 verify_jwt = false
+
+[functions.trending-sports]
+verify_jwt = false
+
+[functions.trending-apps]
+verify_jwt = false
